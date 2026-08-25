@@ -75,11 +75,26 @@ jobs:
           $outDir = "${{ steps.outdir.outputs.out_dir }}"
           $zipName = "SumatraPDF-${{ github.event.inputs.build_type }}-${{ github.event.inputs.platform }}-$(Get-Date -Format 'yyyyMMdd-HHmmss').zip"
           
+          # Verify output directory exists and has files
+          if (-not (Test-Path $outDir)) {
+            Write-Error "Output directory does not exist: $outDir"
+            exit 1
+          }
+          
+          $files = Get-ChildItem -Path $outDir -File
+          if ($files.Count -eq 0) {
+            Write-Error "Output directory is empty: $outDir"
+            exit 1
+          }
+          
+          Write-Host "Files to package:"
+          $files | ForEach-Object { Write-Host "  - $($_.Name)" }
+          
           # Create ZIP file with all contents from output directory
           Compress-Archive -Path "$outDir\*" -DestinationPath "$zipName" -Force
           
-          echo "zip_name=$zipName" >> $env:GITHUB_OUTPUT
-          echo "Created package: $zipName"
+          Write-Host "Created package: $zipName"
+          Write-Host "Package size: $((Get-Item $zipName).Length / 1MB) MB"
         id: package
         shell: pwsh
 
