@@ -1,31 +1,14 @@
 name: Build and Package
 
 on:
-  workflow_dispatch:
-    inputs:
-      build_type:
-        description: 'Build type (release/debug)'
-        required: true
-        default: 'release'
-        type: choice
-        options:
-          - release
-          - debug
-      platform:
-        description: 'Target platform'
-        required: true
-        default: 'x64'
-        type: choice
-        options:
-          - x64
-          - Win32
-          - ARM64
+  push:
+    branches: [ main, master ]
 
 jobs:
   build:
     name: Build and Package
     runs-on: windows-2025-vs2026
-    
+
     steps:
       - name: Check out source code
         uses: actions/checkout@v6
@@ -41,28 +24,12 @@ jobs:
           R2_ACCESS: ${{ secrets.R2_ACCESS }}
           BB_SECRET: ${{ secrets.BB_SECRET }}
           BB_ACCESS: ${{ secrets.BB_ACCESS }}
-        run: |
-          if "${{ github.event.inputs.build_type }}" -eq "debug" {
-            bun .\cmd\build.ts -debug
-          } else {
-            bun .\cmd\build.ts -release
-          }
+        run: bun .\cmd\build.ts -release
         shell: pwsh
 
       - name: Determine output directory
         id: outdir
-        run: |
-          if "${{ github.event.inputs.platform }}" -eq "Win32" {
-            echo "out_dir=out\rel32" >> $env:GITHUB_OUTPUT
-          } elseif "${{ github.event.inputs.platform }}" -eq "ARM64" {
-            echo "out_dir=out\arm64" >> $env:GITHUB_OUTPUT
-          } else {
-            if "${{ github.event.inputs.build_type }}" -eq "debug" {
-              echo "out_dir=out\dbg64" >> $env:GITHUB_OUTPUT
-            } else {
-              echo "out_dir=out\rel64" >> $env:GITHUB_OUTPUT
-            }
-          }
+        run: echo "out_dir=out\rel64" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
       - name: List build output
@@ -71,37 +38,37 @@ jobs:
         shell: pwsh
 
       - name: Create ZIP package
+        id: package
         run: |
           $outDir = "${{ steps.outdir.outputs.out_dir }}"
-          $zipName = "SumatraPDF-${{ github.event.inputs.build_type }}-${{ github.event.inputs.platform }}-$(Get-Date -Format 'yyyyMMdd-HHmmss').zip"
-          
-          # Verify output directory exists and has files
+          $zipName = "SumatraPDF-release-x64-$(Get-Date -Format 'yyyyMMdd-HHmmss').zip"
+
           if (-not (Test-Path $outDir)) {
             Write-Error "Output directory does not exist: $outDir"
             exit 1
           }
-          
+
           $files = Get-ChildItem -Path $outDir -File
           if ($files.Count -eq 0) {
             Write-Error "Output directory is empty: $outDir"
             exit 1
           }
-          
+
           Write-Host "Files to package:"
           $files | ForEach-Object { Write-Host "  - $($_.Name)" }
-          
-          # Create ZIP file with all contents from output directory
+
           Compress-Archive -Path "$outDir\*" -DestinationPath "$zipName" -Force
-          
+
           Write-Host "Created package: $zipName"
           Write-Host "Package size: $((Get-Item $zipName).Length / 1MB) MB"
-        id: package
+
+          echo "zip_name=$zipName" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SumatraPDF-${{ github.event.inputs.build_type }}-${{ github.event.inputs.platform }}
+          name: SumatraPDF-release-x64
           path: "*.zip"
           retention-days: 14
           if-no-files-found: error
@@ -109,9 +76,9 @@ jobs:
       - name: Print build summary
         run: |
           Write-Host "=== Build Summary ==="
-          Write-Host "Build Type: ${{ github.event.inputs.build_type }}"
-          Write-Host "Platform: ${{ github.event.inputs.platform }}"
-          Write-Host "Output Directory: ${{ steps.outdir.outputs.out_dir }}"
+          Write-Host "Build Type: release"
+          Write-Host "Platform: x64"
+          Write-Host "Output Directory: out\rel64"
           Write-Host "Package Name: ${{ steps.package.outputs.zip_name }}"
           Write-Host "====================="
         shell: pwsh
