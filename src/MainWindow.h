@@ -464,6 +464,13 @@ struct MainWindow {
     Vec<int> inkAnnotationPlacementStrokeCounts;
     Vec<PointF> inkAnnotationPlacementPoints;
     bool inkAnnotationPlacementMouseDown = false;
+    // Highlighter mode: fixed-size brush follows mouse without requiring click
+    // (Edge-like highlight behavior)
+    int highlighterCmdId = 0;
+    int highlighterPageNo = -1;
+    Vec<PointF> highlighterPoints;
+    Point highlighterLastScreenPos;
+    bool highlighterActive = false;
     // overlay toolbar mode: the toolbar floats over the page (doesn't reserve
     // space) and is only revealed when the mouse is near the top
     bool isToolbarOverlay = false;
