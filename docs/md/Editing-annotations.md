@@ -70,6 +70,15 @@ Pick a PNG (or JPEG, etc.). The image is stamped on the page and you can drag or
 
 ![Context Menu Annotation Under Cursor](img/context-menu-annot-under-cursor.png)
 
+## Highlighter brush (Edge-style)
+
+Unlike the selection-based highlight (`a`), the **Highlighter** tool works like a marker pen: a fixed-size translucent brush follows the mouse and paints a stroke even over empty areas of the page (no text selection needed). It is stored as a standard PDF ink annotation.
+
+- Start it from the **Annotations** toolbar (`Highlighter` button, next to `Highlight`), from the command palette, or via right-click → **Create annotation under cursor → Highlighter**.
+- Drag on the page to paint. The brush keeps a roughly fixed on-screen size regardless of zoom.
+- **Enter** finishes the stroke(s), **Esc** cancels.
+- The stroke uses the configured `HighlightColor` (default `#ffff00`) at 40% opacity; the on-screen brush size is 22 px (`kHighlightBrushScreenWidthPx` in `src/Canvas.h`).
+
 ## Annotation editor
 
 All those commands will open annotation editor:

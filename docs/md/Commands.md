@@ -198,6 +198,7 @@ CmdCreateAnnotCircle,,Create Circle Annotation,
 CmdCreateAnnotFileAttachment,,Create File Attachment Annotation,
 CmdCreateAnnotFreeText,,Create Free Text Annotation,
 CmdCreateAnnotHighlight,"a, A",Create Highlight Annotation,
+CmdHighlightBrush,,Highlighter,"freehand marker brush that paints even over empty page areas, no text selection needed, ver 3.7+"
 CmdCreateAnnotInk,,Create Ink Annotation,
 CmdCreateAnnotLine,,Create Line Annotation,
 CmdCreateAnnotLink,,Create Link Annotation,

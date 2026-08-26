@@ -464,6 +464,10 @@ struct MainWindow {
     Vec<int> inkAnnotationPlacementStrokeCounts;
     Vec<PointF> inkAnnotationPlacementPoints;
     bool inkAnnotationPlacementMouseDown = false;
+    // Edge-style highlighter brush: reuses the ink placement machinery, but
+    // paints a fixed-size translucent marker stroke (even over empty areas).
+    bool highlightBrushPlacement = false;
+    float highlightBrushWidthPt = 12.0f; // page-space stroke width of the brush
     // overlay toolbar mode: the toolbar floats over the page (doesn't reserve
     // space) and is only revealed when the mouse is near the top
     bool isToolbarOverlay = false;

@@ -751,6 +751,7 @@ bool CancelInkAnnotationPlacement(MainWindow* win) {
     win->inkAnnotationPlacementStrokeCounts.Clear();
     win->inkAnnotationPlacementPoints.Clear();
     win->inkAnnotationPlacementMouseDown = false;
+    win->highlightBrushPlacement = false;
     RemoveNotificationsForGroup(win->hwndCanvas, kNotifInkAnnotationPlacement);
     HideAnnotationHoverOverlay(win);
     ScheduleRepaint(win, 0);
@@ -801,6 +802,23 @@ void StartInkAnnotationPlacement(MainWindow* win, int cmdId) {
     if (HwndClientRect(win->hwndCanvas).Contains(pt)) {
         SetInkAnnotationPlacementCursor();
     }
+}
+
+bool IsPlacingHighlightBrush(MainWindow* win) {
+    return win && win->highlightBrushPlacement;
+}
+
+// Edge-style highlighter: a fixed-size translucent marker brush that follows
+// the mouse and paints even over empty page areas. Reuses the ink placement
+// machinery; the actual marker styling is applied when the stroke is created.
+void StartHighlightBrushPlacement(MainWindow* win, int cmdId) {
+    if (!win) {
+        return;
+    }
+    win->highlightBrushPlacement = true;
+    win->highlightBrushWidthPt = 12.0f; // recomputed per stroke from kHighlightBrushScreenWidthPx
+    StartInkAnnotationPlacement(win, cmdId);
+    // keep the standard ink guide bar ("Draw ink annotation...") — good enough
 }
 
 bool FinishInkAnnotationPlacement(MainWindow* win) {
@@ -1041,6 +1059,18 @@ static bool HandleInkAnnotationPlacementDown(MainWindow* win, Point pt) {
     }
     if (!started) {
         win->inkAnnotationPlacementPageNo = pageNo;
+    }
+    if (win->highlightBrushPlacement) {
+        // Edge-style fixed-size brush: keep the on-screen marker width roughly
+        // constant regardless of zoom by converting the target screen-pixel
+        // width to page points at the current zoom.
+        Point p0 = dm->CvtToScreen(pageNo, PointF(0, 0));
+        Point p1 = dm->CvtToScreen(pageNo, PointF(0, 1)); // 1 PDF point apart
+        float pxPerPt = (float)(p1.y - p0.y);
+        if (pxPerPt < 0.01f) {
+            pxPerPt = 1.0f;
+        }
+        win->highlightBrushWidthPt = (float)kHighlightBrushScreenWidthPx / pxPerPt;
     }
     win->inkAnnotationPlacementStrokeCounts.Append(0);
     win->inkAnnotationPlacementMouseDown = true;
@@ -4356,9 +4386,21 @@ static void PaintInkAnnotationPlacement(MainWindow* win, HDC hdc, DisplayModel* 
 
     Gdiplus::Graphics gs(hdc);
     gs.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-    Gdiplus::Color blue(255, 0, 80, 200);
+    Gdiplus::Color strokeCol(255, 0, 80, 200);
     Gdiplus::REAL width = (Gdiplus::REAL)std::max(DpiScale(2), 1);
-    Gdiplus::Pen pen(blue, width);
+    if (win->highlightBrushPlacement) {
+        // Edge-style highlighter preview: translucent marker stroke, sized to
+        // the fixed on-screen brush width (page-space width * current zoom).
+        strokeCol = Gdiplus::Color(100, 255, 240, 0); // ~40% marker yellow
+        Point p0 = dm->CvtToScreen(pageNo, PointF(0, 0));
+        Point p1 = dm->CvtToScreen(pageNo, PointF(0, 1)); // 1 PDF point apart
+        float pxPerPt = (float)(p1.y - p0.y);
+        if (pxPerPt < 0.01f) {
+            pxPerPt = 1.0f;
+        }
+        width = (Gdiplus::REAL)std::max(1.0f, win->highlightBrushWidthPt * pxPerPt);
+    }
+    Gdiplus::Pen pen(strokeCol, width);
     pen.SetStartCap(Gdiplus::LineCapRound);
     pen.SetEndCap(Gdiplus::LineCapRound);
 
@@ -4371,7 +4413,7 @@ static void PaintInkAnnotationPlacement(MainWindow* win, HDC hdc, DisplayModel* 
         if (count == 1) {
             int dotSize = std::max(DpiScale(3), 2);
             int dotHalf = dotSize / 2;
-            Gdiplus::SolidBrush brush(blue);
+            Gdiplus::SolidBrush brush(strokeCol);
             gs.FillEllipse(&brush, previous.x - dotHalf, previous.y - dotHalf, dotSize, dotSize);
             continue;
         }

@@ -300,6 +300,8 @@ enum {
     CmdConfigurePageGrid = 489,
     CmdTogglePdfAnnotationsToolbar = 490,
     CmdNone = 491,
+    // Edge-style highlighter: freehand marker stroke, no text selection needed.
+    CmdHighlightBrush = 492,
 
     /* range for file history */
     CmdFileHistoryFirst,

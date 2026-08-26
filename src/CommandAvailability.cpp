@@ -229,6 +229,7 @@ static UINT_PTR removeIfAnnotsNotSupported[] = {
     // range check doesn't catch it
     CmdCreateAnnotImageFromClipboard,
     CmdInsertImage,
+    CmdHighlightBrush,
     0,
 };
 

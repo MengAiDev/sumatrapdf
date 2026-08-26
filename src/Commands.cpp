@@ -307,6 +307,7 @@ static SeqStrings gCommandNames =
     "CmdConfigurePageGrid\0"
     "CmdTogglePdfAnnotationsToolbar\0"
     "CmdNone\0"
+    "CmdHighlightBrush\0"
     "\0";
 
 static i32 gCommandIds[] = {
@@ -601,6 +602,7 @@ static i32 gCommandIds[] = {
     CmdConfigurePageGrid,
     CmdTogglePdfAnnotationsToolbar,
     CmdNone,
+    CmdHighlightBrush,
 };
 
 SeqStrings gCommandDescriptions =
@@ -895,6 +897,7 @@ SeqStrings gCommandDescriptions =
     "Configure Page Grid...\0"
     "Toggle PDF Annotations Toolbar\0"
     "Do nothing\0"
+    "Highlight with Brush\0"
     "\0";
 // clang-format on
 // @gen-end cmd-c
