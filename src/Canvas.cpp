@@ -4391,7 +4391,7 @@ static void PaintInkAnnotationPlacement(MainWindow* win, HDC hdc, DisplayModel* 
     if (win->highlightBrushPlacement) {
         // Edge-style highlighter preview: translucent marker stroke, sized to
         // the fixed on-screen brush width (page-space width * current zoom).
-        strokeCol = Gdiplus::Color(100, 255, 240, 0); // ~40% marker yellow
+        strokeCol = Gdiplus::Color(153, 255, 240, 0); // ~60% marker yellow
         Point p0 = dm->CvtToScreen(pageNo, PointF(0, 0));
         Point p1 = dm->CvtToScreen(pageNo, PointF(0, 1)); // 1 PDF point apart
         float pxPerPt = (float)(p1.y - p0.y);

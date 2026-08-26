@@ -52,7 +52,7 @@ void StartHighlightBrushPlacement(MainWindow*, int cmdId);
 // roughly constant while drawing regardless of zoom (Edge-like behavior).
 constexpr int kHighlightBrushScreenWidthPx = 22;
 // Translucency of the marker stroke when saved to the PDF, in percent.
-constexpr int kHighlightBrushOpacity = 40;
+constexpr int kHighlightBrushOpacity = 60;
 void DrawCanvasKeyboardFocusIfNeeded(MainWindow* win, HDC hdc);
 void InvalidateCanvasKeyboardFocus(MainWindow* win);
 

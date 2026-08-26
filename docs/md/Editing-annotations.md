@@ -77,7 +77,7 @@ Unlike the selection-based highlight (`a`), the **Highlighter** tool works like 
 - Start it from the **Annotations** toolbar (`Highlighter` button, next to `Highlight`), from the command palette, or via right-click → **Create annotation under cursor → Highlighter**.
 - Drag on the page to paint. The brush keeps a roughly fixed on-screen size regardless of zoom.
 - **Enter** finishes the stroke(s), **Esc** cancels.
-- The stroke uses the configured `HighlightColor` (default `#ffff00`) at 40% opacity; the on-screen brush size is 22 px (`kHighlightBrushScreenWidthPx` in `src/Canvas.h`).
+- The stroke uses the configured `HighlightColor` (default `#ffff00`) at 60% opacity; the on-screen brush size is 22 px (`kHighlightBrushScreenWidthPx` in `src/Canvas.h`).
 
 ## Annotation editor
 
