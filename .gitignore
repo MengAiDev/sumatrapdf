@@ -1,4 +1,71 @@
 ```
-# CI/CD
-.github/
+# Compiled and build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+venv/
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+target/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python specific
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.manifest
+*.spec
+
+# C/C++ specific
+*.i
+*.ii
+*.s
+*.su
+*.sln
+*.vcxproj
+*.vcproj
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.opendb
+*.pidb
+*.svclog
 ```
