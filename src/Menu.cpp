@@ -933,6 +933,10 @@ static MenuDef menuDefCreateAnnotUnderCursor[] = {
         CmdCreateAnnotFreeText,
     },
     {
+        _TRN("&Highlighter"),
+        CmdHighlightBrush,
+    },
+    {
         _TRN("&Stamp"),
         CmdCreateAnnotStamp,
     },
@@ -2387,6 +2391,11 @@ void OnWindowContextMenu(MainWindow* win, int x, int y) {
 // Commands whose frame handler needs the original canvas click rather than
 // the cursor's position after the context menu has closed.
 bool CommandUsesContextMenuPoint(int cmdId) {
+    if (cmdId == CmdHighlightBrush) {
+        // the highlighter is a drag-to-draw tool, not a point-placed annotation:
+        // dispatch without the cursor point so it enters brush drawing mode
+        return false;
+    }
     if (CmdIdToAnnotationType(cmdId) != AnnotationType::Unknown) {
         return true;
     }

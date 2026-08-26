@@ -12434,6 +12434,12 @@ static LRESULT FrameOnCommand(MainWindow* win, HWND hwnd, UINT msg, WPARAM wp, L
                 return 0;
             }
             [[fallthrough]];
+        case CmdHighlightBrush:
+            if (annotType == AnnotationType::Ink && !isInkAnnotationPlacement && lp == 0) {
+                StartHighlightBrushPlacement(win, invokedCmdId);
+                return 0;
+            }
+            [[fallthrough]];
         case CmdCreateAnnotInk:
             if (annotType == AnnotationType::Ink && !isInkAnnotationPlacement && lp == 0) {
                 StartInkAnnotationPlacement(win, invokedCmdId);
@@ -12520,6 +12526,21 @@ static LRESULT FrameOnCommand(MainWindow* win, HWND hwnd, UINT msg, WPARAM wp, L
             pt = HwndMapWindowPoint(win->hwndCanvas, HWND_DESKTOP, pt);
             AnnotCreateArgs args{annotType};
             SetAnnotCreateArgs(args, cmd);
+            if (isInkAnnotationPlacement && win && win->highlightBrushPlacement) {
+                // Edge-style highlighter: fixed-size translucent marker stroke
+                // that paints even over empty page areas (stored as Ink).
+                args.borderWidth = (int)(win->highlightBrushWidthPt + 0.5f);
+                args.opacity = kHighlightBrushOpacity;
+                ParsedColor* hlCol = GetParsedColor(gGlobalPrefs->annotations.highlightColor);
+                if (hlCol && hlCol->parsedOk) {
+                    args.col = *hlCol;
+                } else {
+                    args.col = {};
+                    args.col.parsedOk = true;
+                    args.col.pdfCol = MkPdfColor(0xff, 0xf0, 0x00, 0xff); // marker yellow
+                    args.col.col = kColYellow;
+                }
+            }
             if (isInkAnnotationPlacement) {
                 args.inkStrokeCounts = &win->inkAnnotationPlacementStrokeCounts;
                 args.inkPoints = &win->inkAnnotationPlacementPoints;

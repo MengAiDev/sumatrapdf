@@ -1769,6 +1769,17 @@ Annotation* EngineMupdfCreateAnnotation(EngineBase* engine, int pageNo, PointF p
                     pdf_set_annot_opacity(ctx, annot, fop);
                 }
             }
+            // The Edge-style highlighter brush is stored as an Ink annotation:
+            // give it its fixed marker width and marker translucency here.
+            if (typ == AnnotationType::Ink) {
+                if (args->borderWidth >= 0) {
+                    pdf_set_annot_border_width(ctx, annot, (float)args->borderWidth);
+                }
+                if (args->opacity < 100) {
+                    float fop = (float)args->opacity / 100.0f;
+                    pdf_set_annot_opacity(ctx, annot, fop);
+                }
+            }
 
             if (interiorCol.parsedOk && AnnotationSupportsInteriorColor(typ)) {
                 float interiorColor[3]{};
@@ -1832,6 +1843,7 @@ AnnotationType CmdIdToAnnotationType(int cmdId) {
         case CmdCreateAnnotStamp:          return AnnotationType::Stamp;
         case CmdCreateAnnotCaret:          return AnnotationType::Caret;
         case CmdCreateAnnotInk:            return AnnotationType::Ink;
+        case CmdHighlightBrush:            return AnnotationType::Ink;
         case CmdCreateAnnotPopup:          return AnnotationType::Popup;
         case CmdCreateAnnotFileAttachment: return AnnotationType::FileAttachment;
     }

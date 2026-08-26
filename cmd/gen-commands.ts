@@ -300,6 +300,7 @@ export const commands = [
     "CmdConfigurePageGrid", "Configure Page Grid...",
     "CmdTogglePdfAnnotationsToolbar", "Toggle PDF Annotations Toolbar",
     "CmdNone", "Do nothing",
+    "CmdHighlightBrush", "Highlight with Brush",
 ];
 
 function getNames(): string[] {

@@ -45,6 +45,14 @@ bool FinishInkAnnotationPlacement(MainWindow*);
 bool CancelInkAnnotationPlacement(MainWindow*);
 void DeleteInkAnnotationPlacementCursor();
 TempStr InkAnnotationPlacementStateTemp(MainWindow*);
+// Edge-style highlighter brush (reuses the ink placement machinery)
+bool IsPlacingHighlightBrush(MainWindow*);
+void StartHighlightBrushPlacement(MainWindow*, int cmdId);
+// Fixed on-screen width of the highlighter brush in screen pixels, kept
+// roughly constant while drawing regardless of zoom (Edge-like behavior).
+constexpr int kHighlightBrushScreenWidthPx = 22;
+// Translucency of the marker stroke when saved to the PDF, in percent.
+constexpr int kHighlightBrushOpacity = 40;
 void DrawCanvasKeyboardFocusIfNeeded(MainWindow* win, HDC hdc);
 void InvalidateCanvasKeyboardFocus(MainWindow* win);
 
