@@ -32,7 +32,53 @@ jobs:
         run: echo "out_dir=out\rel64" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
-      - name: List build output
+      - name: List build output (before cleanup)
+        run: |
+          Get-ChildItem -Path "${{ steps.outdir.outputs.out_dir }}" -Recurse | Select-Object FullName, Length
+        shell: pwsh
+
+      # ----- 新增：删除非必须文件，减小包体积 -----
+      - name: Remove unnecessary build artifacts
+        run: |
+          $outDir = "${{ steps.outdir.outputs.out_dir }}"
+          Write-Host "Cleaning up $outDir ..."
+
+          # 删除整个 obj 和 obj-s 目录（含所有中间对象、静态库、日志等）
+          if (Test-Path "$outDir\obj") {
+            Remove-Item -Recurse -Force "$outDir\obj"
+            Write-Host "Removed obj directory"
+          }
+          if (Test-Path "$outDir\obj-s") {
+            Remove-Item -Recurse -Force "$outDir\obj-s"
+            Write-Host "Removed obj-s directory"
+          }
+
+          # 删除所有调试符号、映射文件、导出库、静态库、recipe 文件
+          Get-ChildItem -Path $outDir -Recurse -Include *.pdb, *.map, *.exp, *.lib, *.recipe | Remove-Item -Force
+          Write-Host "Removed .pdb, .map, .exp, .lib, .recipe files"
+
+          # 删除所有 .tlog 目录（编译日志）
+          Get-ChildItem -Path $outDir -Recurse -Directory -Include *.tlog | Remove-Item -Recurse -Force
+          Write-Host "Removed .tlog directories"
+
+          # 删除预编译头文件（.pch）
+          Get-ChildItem -Path $outDir -Recurse -Include *.pch | Remove-Item -Force
+          Write-Host "Removed .pch files"
+
+          # 删除测试工具（非发布内容）
+          if (Test-Path "$outDir\test_util.exe") {
+            Remove-Item -Force "$outDir\test_util.exe"
+            Write-Host "Removed test_util.exe"
+          }
+          if (Test-Path "$outDir\test_util.pdb") {
+            Remove-Item -Force "$outDir\test_util.pdb"
+            Write-Host "Removed test_util.pdb"
+          }
+
+          Write-Host "Cleanup completed."
+        shell: pwsh
+
+      - name: List build output (after cleanup)
         run: |
           Get-ChildItem -Path "${{ steps.outdir.outputs.out_dir }}" -Recurse | Select-Object FullName, Length
         shell: pwsh
@@ -42,26 +88,20 @@ jobs:
         run: |
           $outDir = "${{ steps.outdir.outputs.out_dir }}"
           $zipName = "SumatraPDF-release-x64-$(Get-Date -Format 'yyyyMMdd-HHmmss').zip"
-
           if (-not (Test-Path $outDir)) {
             Write-Error "Output directory does not exist: $outDir"
             exit 1
           }
-
           $files = Get-ChildItem -Path $outDir -File
           if ($files.Count -eq 0) {
             Write-Error "Output directory is empty: $outDir"
             exit 1
           }
-
           Write-Host "Files to package:"
           $files | ForEach-Object { Write-Host "  - $($_.Name)" }
-
           Compress-Archive -Path "$outDir\*" -DestinationPath "$zipName" -Force
-
           Write-Host "Created package: $zipName"
           Write-Host "Package size: $((Get-Item $zipName).Length / 1MB) MB"
-
           echo "zip_name=$zipName" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
