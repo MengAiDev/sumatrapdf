@@ -70,7 +70,7 @@ struct ScreenshotOverlayData {
     int winH = 0;
     // transient message shown in the info bar (e.g. "Copied to clipboard"),
     // cleared by a one-shot timer
-    Str statusMsg = nullptr;
+    Str statusMsg{};
     UINT_PTR statusTimer = 0;
 };
 
@@ -1135,7 +1135,7 @@ static LRESULT CALLBACK WndProcScreenshotOverlay(HWND hwnd, UINT msg, WPARAM wp,
                 KillTimer(hwnd, data->statusTimer);
                 data->statusTimer = 0;
                 str::Free(data->statusMsg);
-                data->statusMsg = nullptr;
+                data->statusMsg = Str{};
                 PaintOverlayLayered(hwnd, data);
                 return 0;
             }
